@@ -1,25 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import LoginForm from './components/LoginForm';
 
-function App() {
+const wrapperStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+  backgroundColor: '#eee',
+};
+
+const App = () => {
+  const handleLogin = (data) => {
+    console.log('Login data:', data);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={wrapperStyle}>
+      <LoginForm onSubmit={handleLogin} />
     </div>
   );
-}
+};
 
 export default App;
