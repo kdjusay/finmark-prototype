@@ -4,9 +4,37 @@ const LoginForm = ({ onSubmit }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ email, password });
+
+    let isValid = true;
+
+    // Validate email
+    if (!email) {
+      setEmailError('Email is required');
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Invalid email format');
+      isValid = false;
+    } else {
+      setEmailError('');
+    }
+
+    // Validate password
+    if (!password) {
+      setPasswordError('Password is required');
+      isValid = false;
+    } else {
+      setPasswordError('');
+    }
+
+    // Only submit if valid
+    if (isValid) {
+      onSubmit({ email, password });
+    }
   };
 
   return (
@@ -21,6 +49,8 @@ const LoginForm = ({ onSubmit }) => {
           required
           style={inputStyle}
         />
+        {/* Display email error */}
+        {emailError && <p style={{ color: 'red', margin: '5px 0 0 0' }}>{emailError}</p>}
       </div>
       <div style={fieldGroupStyle}>
         <label>Password:</label>
@@ -31,6 +61,8 @@ const LoginForm = ({ onSubmit }) => {
           required
           style={inputStyle}
         />
+        {/* Display password error */}
+        {passwordError && <p style={{ color: 'red', margin: '5px 0 0 0' }}>{passwordError}</p>}
       </div>
       <button type="submit" style={buttonStyle}>
         Login
