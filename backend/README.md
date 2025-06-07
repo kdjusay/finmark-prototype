@@ -11,12 +11,10 @@ backend/
 ├── src/              # Source code
 │   ├── controllers/  # Request handlers
 │   │   ├── auth.controller.js
-│   │   └── health.controller.js
 │   ├── middleware/   # Express middleware
 │   │   └── logger.middleware.js
 │   └── routes/       # API routes
 │       ├── auth.routes.js
-│       ├── health.routes.js
 │       └── index.js  # Route aggregator
 ├── .env              # Environment variables
 ├── package.json      # Dependencies and scripts
@@ -41,19 +39,6 @@ backend/
    ```
 
 ## API Endpoints
-
-### Health Check
-- **URL**: `/api/health`
-- **Method**: `GET`
-- **Description**: Returns API status and timestamp
-- **Response Example**:
-  ```json
-  {
-    "success": true,
-    "message": "API is running",
-    "timestamp": "2025-06-08T12:34:56.789Z"
-  }
-  ```
 
 ### Login
 - **URL**: `/api/auth/login`

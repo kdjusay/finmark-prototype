@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { login } = require('../controllers/auth.controller');
 
-// Login route
-router.post('/login', login);
+/**
+ * @route   POST /api/login
+ * @desc    Authenticate user & get token
+ * @access  Public
+ */
+router.post('/', login);
 
 module.exports = router;

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authRoutes = require('./auth.routes');
-const healthRoutes = require('./health.routes');
+const loginRoute = require('./login.route');
+const userRoutes = require('./user.routes');
 
 // API routes
-router.use('/api/auth', authRoutes);
-router.use('/api/health', healthRoutes);
+router.use('/api/login', loginRoute);
+router.use('/api/users', userRoutes);
 
 module.exports = router;
