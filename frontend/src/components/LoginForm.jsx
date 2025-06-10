@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const LoginForm = ({ onSubmit }) => {
+const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,7 +33,30 @@ const LoginForm = ({ onSubmit }) => {
 
     // Only submit if valid
     if (isValid) {
-      onSubmit({ email, password });
+      // API call to backend
+      fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Login successful:', data);
+            alert('Login successful!');
+            // Example: Redirect to dashboard or home page
+            // window.location.href = '/dashboard';
+          } else {
+            console.log('Login failed:', data.message);
+            alert(`Login failed: ${data.message}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error during login:', error);
+          alert('An error occurred during login.');
+        });
     }
   };
 
