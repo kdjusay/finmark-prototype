@@ -31,8 +31,11 @@ const LoginForm = () => {
       setPasswordError('');
     }
 
+    console.log('API URL:', process.env.REACT_APP_API_URL);
+
     // Only submit if valid
     if (isValid) {
+      
       // API call to backend
       fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
         method: 'POST',
