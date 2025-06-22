@@ -7,89 +7,95 @@ const LoginForm = () => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
+  const validateEmail = (email) => {
+    return /\S+@\S+\.\S+/.test(email);
+  };
+
+  const validatePassword = (password) => {
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return hasMinLength && hasUpper && hasNumber && hasSpecial;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     let isValid = true;
 
-    // Validate email
+    // Email validation
     if (!email) {
       setEmailError('Email is required');
       isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    } else if (!validateEmail(email)) {
       setEmailError('Invalid email format');
       isValid = false;
     } else {
       setEmailError('');
     }
 
-    // Validate password
+    // Password validation
     if (!password) {
       setPasswordError('Password is required');
+      isValid = false;
+    } else if (!validatePassword(password)) {
+      setPasswordError('Password must be at least 8 chars, contain uppercase, number, and special character');
       isValid = false;
     } else {
       setPasswordError('');
     }
 
-    // Only submit if valid
-    if (isValid) {
-      // API call to backend
-      fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
+    if (!isValid) return;
+
+    // API Call
+    fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Login successful!');
+          // window.location.href = '/dashboard'; // Future
+        } else {
+          alert(`Login failed: ${data.message}`);
+        }
       })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            console.log('Login successful:', data);
-            alert('Login successful!');
-            // Example: Redirect to dashboard or home page
-            // window.location.href = '/dashboard';
-          } else {
-            console.log('Login failed:', data.message);
-            alert(`Login failed: ${data.message}`);
-          }
-        })
-        .catch(error => {
-          console.error('Error during login:', error);
-          alert('An error occurred during login.');
-        });
-    }
+      .catch(error => {
+        console.error('Login error:', error);
+        alert('An error occurred during login.');
+      });
   };
 
   return (
     <form onSubmit={handleSubmit} style={formStyle}>
       <h2 style={{ textAlign: 'center' }}>Login</h2>
+
       <div style={fieldGroupStyle}>
         <label>Email:</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
-          style={inputStyle}
+          style={{ ...inputStyle, borderColor: emailError ? 'red' : '#ccc' }}
         />
-        {/* Display email error */}
-        {emailError && <p style={{ color: 'red', margin: '5px 0 0 0' }}>{emailError}</p>}
+        {emailError && <p style={errorStyle}>{emailError}</p>}
       </div>
+
       <div style={fieldGroupStyle}>
         <label>Password:</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
-          style={inputStyle}
+          style={{ ...inputStyle, borderColor: passwordError ? 'red' : '#ccc' }}
         />
-        {/* Display password error */}
-        {passwordError && <p style={{ color: 'red', margin: '5px 0 0 0' }}>{passwordError}</p>}
+        {passwordError && <p style={errorStyle}>{passwordError}</p>}
       </div>
-      <button type="submit" style={buttonStyle}>
-        Login
-      </button>
+
+      <button type="submit" style={buttonStyle}>Login</button>
     </form>
   );
 };
@@ -127,6 +133,11 @@ const buttonStyle = {
 
 const fieldGroupStyle = {
   marginBottom: '10px',
+};
+
+const errorStyle = {
+  color: 'red',
+  margin: '5px 0 0 0',
 };
 
 export default LoginForm;
