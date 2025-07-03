@@ -66,6 +66,7 @@ const LoginForm = () => {
             setTimeout(() => navigate('/admin/dashboard'), 1000);
           } else {
             showModalDialog('Login successful!');
+            setTimeout(() => navigate('/'), 1000);
           }
         } else {
           showModalDialog(`Login failed: ${data.message}`);
