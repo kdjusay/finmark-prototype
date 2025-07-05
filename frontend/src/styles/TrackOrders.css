@@ -1,0 +1,75 @@
+.track-page {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #4c91af;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.track-header h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.logout-btn {
+  background-color: #ffffff;
+  color: #4c91af;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #d32f2f;
+}
+
+.track-container {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+
+.track-search {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.track-card {
+  padding: 20px;
+  background-color: #f1f9fc;
+  border: 1px solid #d3e3eb;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.no-results {
+  font-style: italic;
+  color: #888;
+  text-align: center;
+}

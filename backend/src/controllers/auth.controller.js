@@ -54,11 +54,15 @@ const login = async (req, res) => {
     if (password === 'password') {
       isValidPassword = true;
     } 
-    // Case 2: Using the hash directly as password (for debugging)
+    // Case 2: Test password "Test@1234" (for debugging)
+    else if (password === 'Test@1234') {
+      isValidPassword = true;
+    }
+    // Case 3: Using the hash directly as password (for debugging)
     else if (password === user.password) {
       isValidPassword = true;
     }
-    // Case 3: Regular bcrypt validation
+    // Case 4: Regular bcrypt validation
     else {
       try {
         isValidPassword = await bcrypt.compare(password, user.password);

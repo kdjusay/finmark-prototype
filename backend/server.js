@@ -32,7 +32,16 @@ app.listen(PORT, () => {
   console.log(`   POST http://localhost:${PORT}/api/auth/login`);
   console.log(`   POST http://localhost:${PORT}/api/login`);
   console.log(`   GET  http://localhost:${PORT}/api/users`);
+  console.log(`   GET  http://localhost:${PORT}/api/users/search?q=<query>`);
   console.log(`   GET  http://localhost:${PORT}/api/users/:id`);
+  console.log(`   POST http://localhost:${PORT}/api/users`);
+  console.log(`   PUT  http://localhost:${PORT}/api/users/:id`);
+  console.log(`   DELETE http://localhost:${PORT}/api/users/:id`);
+  console.log(`\nLogin Credentials for Testing:`);
+  console.log(`   Admin: admin@finmark.com / password`);
+  console.log(`   User: john@example.com / password`);
+  console.log(`\nFrontend: http://localhost:3000`);
+  console.log(`Admin Dashboard: http://localhost:3000/admin/dashboard`);
 });
 
 module.exports = app;
