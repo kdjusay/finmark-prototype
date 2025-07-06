@@ -15,7 +15,6 @@ const TrackOrders = () => {
     <div className="track-page">
       <div className="track-header">
         <h2>🚚 Track Orders</h2>
-        <button className="logout-btn">Logout</button>
       </div>
 
       <div className="track-container">

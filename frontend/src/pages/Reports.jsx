@@ -6,7 +6,6 @@ const Reports = () => {
     <div className="reports-page">
       <div className="reports-header">
         <h2>📊 Reports Summary</h2>
-        <button className="logout-btn">Logout</button>
       </div>
 
       <div className="reports-container">

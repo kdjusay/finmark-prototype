@@ -18,7 +18,6 @@ const Feedback = () => {
     <div className="feedback-page">
       <div className="feedback-header">
         <h2>💬 Submit Feedback</h2>
-        <button className="logout-btn">Logout</button>
       </div>
 
       <div className="feedback-container">

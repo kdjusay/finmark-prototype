@@ -8,6 +8,7 @@ import Checkout from './pages/Checkout';
 import Feedback from './pages/Feedback';
 import TrackOrders from './pages/TrackOrders';
 import Reports from './pages/Reports';
+import UserRoute from './components/UserRoute';
 
 const App = () => (
   <Router>
@@ -17,12 +18,12 @@ const App = () => (
 
       {/* Routes wrapped in sidebar layout */}
       <Route element={<MainMenuLayout />}>
-        <Route path="/products" element={<ViewProducts />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/track" element={<TrackOrders />} />
-        <Route path="/reports" element={<Reports />} />
-        {/* Add more pages here like Checkout, Feedback, etc. */}
+        <Route path="/products" element={<UserRoute><ViewProducts /></UserRoute>} />
+        <Route path="/checkout" element={<UserRoute><Checkout /></UserRoute>} />
+        <Route path="/track" element={<UserRoute><TrackOrders /></UserRoute>} />
+        <Route path="/feedback" element={<UserRoute><Feedback /></UserRoute>} />
+        <Route path="/reports" element={<UserRoute><Reports /></UserRoute>} />
+      {/* Add more pages here like Checkout, Feedback, etc. */}
       </Route>
     </Routes>
   </Router>
