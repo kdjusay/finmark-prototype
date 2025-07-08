@@ -60,14 +60,15 @@ const LoginForm = () => {
       .then(res => res.json())
       .then(data => {
         if (data.success || data.message === 'Admin login successful') {
-          const role = data.user?.role || data.admin?.role;
-          if (role === 'admin') {
-            showModalDialog('Welcome Admin!');
-            setTimeout(() => navigate('/admin/dashboard'), 1000);
-          } else {
-            showModalDialog('Login successful!');
-            setTimeout(() => navigate('/'), 1000);
-          }
+          const user = data.user || data.admin;
+          localStorage.setItem('user', JSON.stringify(user)); // ✅ Save the logged-in user
+        if (user.role === 'admin') {
+          showModalDialog('Welcome Admin!');
+          setTimeout(() => navigate('/admin/dashboard'), 1000);
+        } else {
+          showModalDialog('Login successful!');
+          setTimeout(() => navigate('/products'), 1000); // Redirect non-admin to products
+        }
         } else {
           showModalDialog(`Login failed: ${data.message}`);
         }

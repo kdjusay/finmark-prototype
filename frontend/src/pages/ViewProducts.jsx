@@ -34,7 +34,6 @@ const ViewProducts = () => {
     <div className="products-page">
       <div className="header">
         <div className="header-title">🔍 View / Search Products</div>
-        <button className="logout-btn">Logout</button>
       </div>
 
       <input

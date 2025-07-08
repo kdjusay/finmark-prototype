@@ -28,7 +28,6 @@ const Checkout = () => {
     <div className="checkout-container">
       <div className="checkout-header">
         <h2>🧾 Order Summary</h2>
-        <button className="logout-btn">Logout</button>
       </div>
 
       <div className="order-summary">

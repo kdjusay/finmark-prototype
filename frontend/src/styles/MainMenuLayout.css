@@ -48,3 +48,21 @@
   padding: 30px;
   overflow-y: auto;
 }
+
+.logout-btn {
+  margin-top: 40px;
+  background-color: #ffffff;
+  color: rgb(251, 87, 87);
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #d32f2f;
+}
