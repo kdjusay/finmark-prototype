@@ -9,8 +9,9 @@ const AdminDashboard = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const [messageType, setMessageType] = useState('');
 
+  // Flat fields only
   const [newUser, setNewUser] = useState({
     email: '',
     password: '',
@@ -20,23 +21,28 @@ const AdminDashboard = () => {
     role: 'user'
   });
 
+  // Fetch users
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users`);
       const data = await res.json();
-      setUsers(data.users || []);
+      setUsers((data.users || []).map(u => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.first_name || '',
+        lastName: u.last_name || '',
+        phone: u.phone || '',
+        role: u.role
+      })));
     } catch (err) {
-      console.error('User fetch failed:', err);
       showMessage('Failed to fetch users', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const showMessage = (msg, type) => {
     setMessage(msg);
@@ -46,30 +52,24 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     setShowLogoutModal(false);
-    alert('Logged out!');
     window.location.href = '/';
   };
 
   const cancelLogout = () => setShowLogoutModal(false);
 
   const confirmDelete = async (user) => {
-    const confirm = window.confirm(`Delete user ${user.email}?`);
-    if (confirm) {
+    if (window.confirm(`Delete user ${user.email}?`)) {
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user.id}`, {
-          method: 'DELETE'
-        });
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user.id}`, { method: 'DELETE' });
         const data = await res.json();
-        
         if (data.success) {
           showMessage('User deleted successfully', 'success');
           fetchUsers();
         } else {
           showMessage(data.message || 'Failed to delete user', 'error');
         }
-      } catch (err) {
-        console.error('Delete user failed:', err);
+      } catch {
         showMessage('Failed to delete user', 'error');
       } finally {
         setLoading(false);
@@ -87,7 +87,6 @@ const AdminDashboard = () => {
         body: JSON.stringify(newUser)
       });
       const data = await res.json();
-      
       if (data.success) {
         showMessage('User created successfully', 'success');
         setShowCreateModal(false);
@@ -96,8 +95,7 @@ const AdminDashboard = () => {
       } else {
         showMessage(data.message || 'Failed to create user', 'error');
       }
-    } catch (err) {
-      console.error('Create user failed:', err);
+    } catch {
       showMessage('Failed to create user', 'error');
     } finally {
       setLoading(false);
@@ -108,20 +106,20 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      const body = {
+        email: editingUser.email,
+        firstName: editingUser.firstName,
+        lastName: editingUser.lastName,
+        phone: editingUser.phone,
+        role: editingUser.role
+      };
+      if (editingUser.password) body.password = editingUser.password;
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${editingUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: editingUser.email,
-          firstName: editingUser.profile.firstName,
-          lastName: editingUser.profile.lastName,
-          phone: editingUser.profile.phone,
-          role: editingUser.role,
-          ...(editingUser.password && { password: editingUser.password })
-        })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
-      
       if (data.success) {
         showMessage('User updated successfully', 'success');
         setShowEditModal(false);
@@ -130,16 +128,24 @@ const AdminDashboard = () => {
       } else {
         showMessage(data.message || 'Failed to update user', 'error');
       }
-    } catch (err) {
-      console.error('Update user failed:', err);
+    } catch {
       showMessage('Failed to update user', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  // Always flat fields
   const openEditModal = (user) => {
-    setEditingUser({ ...user, password: '' });
+    setEditingUser({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phone: user.phone,
+      role: user.role,
+      password: ''
+    });
     setShowEditModal(true);
   };
 
@@ -149,14 +155,19 @@ const AdminDashboard = () => {
       fetchUsers();
       return;
     }
-    
     try {
       setLoading(true);
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users/search?q=${encodeURIComponent(searchTerm)}`);
       const data = await res.json();
-      setUsers(data.users || []);
-    } catch (err) {
-      console.error('Search failed:', err);
+      setUsers((data.users || []).map(u => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.first_name || '',
+        lastName: u.last_name || '',
+        phone: u.phone || '',
+        role: u.role
+      })));
+    } catch {
       showMessage('Search failed', 'error');
     } finally {
       setLoading(false);
@@ -174,7 +185,6 @@ const AdminDashboard = () => {
       {/* Content */}
       <div style={contentBox}>
         <h2 style={sectionTitle}>Admin Dashboard</h2>
-
         <div style={topBar}>
           <input
             type="text"
@@ -187,7 +197,6 @@ const AdminDashboard = () => {
             + Create New User
           </button>
         </div>
-
         {message && (
           <div style={{
             ...messageStyle,
@@ -198,11 +207,8 @@ const AdminDashboard = () => {
             {message}
           </div>
         )}
-
         <p style={tableTitle}>List of Registered Users:</p>
-
         {loading && <div style={loadingStyle}>Loading...</div>}
-        
         <table style={tableStyle}>
           <thead>
             <tr>
@@ -217,7 +223,7 @@ const AdminDashboard = () => {
             {users.map(u => (
               <tr key={u.id}>
                 <td style={tdStyle}>{u.email}</td>
-                <td style={tdStyle}>{u.profile?.firstName} {u.profile?.lastName}</td>
+                <td style={tdStyle}>{u.firstName} {u.lastName}</td>
                 <td style={tdStyle}>
                   <span style={{
                     ...roleStyle,
@@ -226,18 +232,18 @@ const AdminDashboard = () => {
                     {u.role}
                   </span>
                 </td>
-                <td style={tdStyle}>{u.profile?.phone || '-'}</td>
+                <td style={tdStyle}>{u.phone || '-'}</td>
                 <td style={tdStyle}>
                   <button style={actionBtn} onClick={() => openEditModal(u)} disabled={loading}>
                     Edit
                   </button>
-                  <button 
+                  <button
                     style={{
                       ...deleteBtn,
                       opacity: u.role === 'admin' ? 0.5 : 1,
                       cursor: u.role === 'admin' ? 'not-allowed' : 'pointer'
-                    }} 
-                    onClick={() => confirmDelete(u)} 
+                    }}
+                    onClick={() => confirmDelete(u)}
                     disabled={loading || u.role === 'admin'}
                   >
                     Delete
@@ -268,7 +274,7 @@ const AdminDashboard = () => {
                   <input
                     type="email"
                     value={newUser.email}
-                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -278,7 +284,7 @@ const AdminDashboard = () => {
                   <input
                     type="password"
                     value={newUser.password}
-                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                     style={inputStyle}
                     placeholder="Min 8 chars, uppercase, lowercase, number, special char"
                     required
@@ -291,7 +297,7 @@ const AdminDashboard = () => {
                   <input
                     type="text"
                     value={newUser.firstName}
-                    onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -301,7 +307,7 @@ const AdminDashboard = () => {
                   <input
                     type="text"
                     value={newUser.lastName}
-                    onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -313,7 +319,7 @@ const AdminDashboard = () => {
                   <input
                     type="tel"
                     value={newUser.phone}
-                    onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
                     style={inputStyle}
                   />
                 </div>
@@ -321,7 +327,7 @@ const AdminDashboard = () => {
                   <label>Role</label>
                   <select
                     value={newUser.role}
-                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                     style={inputStyle}
                   >
                     <option value="user">User</option>
@@ -355,7 +361,7 @@ const AdminDashboard = () => {
                   <input
                     type="email"
                     value={editingUser.email}
-                    onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -365,7 +371,7 @@ const AdminDashboard = () => {
                   <input
                     type="password"
                     value={editingUser.password}
-                    onChange={(e) => setEditingUser({...editingUser, password: e.target.value})}
+                    onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
                     style={inputStyle}
                     placeholder="Min 8 chars, uppercase, lowercase, number, special char"
                   />
@@ -376,11 +382,8 @@ const AdminDashboard = () => {
                   <label>First Name *</label>
                   <input
                     type="text"
-                    value={editingUser.profile?.firstName || ''}
-                    onChange={(e) => setEditingUser({
-                      ...editingUser, 
-                      profile: {...editingUser.profile, firstName: e.target.value}
-                    })}
+                    value={editingUser.firstName}
+                    onChange={(e) => setEditingUser({ ...editingUser, firstName: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -389,11 +392,8 @@ const AdminDashboard = () => {
                   <label>Last Name *</label>
                   <input
                     type="text"
-                    value={editingUser.profile?.lastName || ''}
-                    onChange={(e) => setEditingUser({
-                      ...editingUser, 
-                      profile: {...editingUser.profile, lastName: e.target.value}
-                    })}
+                    value={editingUser.lastName}
+                    onChange={(e) => setEditingUser({ ...editingUser, lastName: e.target.value })}
                     style={inputStyle}
                     required
                   />
@@ -404,11 +404,8 @@ const AdminDashboard = () => {
                   <label>Phone</label>
                   <input
                     type="tel"
-                    value={editingUser.profile?.phone || ''}
-                    onChange={(e) => setEditingUser({
-                      ...editingUser, 
-                      profile: {...editingUser.profile, phone: e.target.value}
-                    })}
+                    value={editingUser.phone || ''}
+                    onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
                     style={inputStyle}
                   />
                 </div>
@@ -416,7 +413,7 @@ const AdminDashboard = () => {
                   <label>Role</label>
                   <select
                     value={editingUser.role}
-                    onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+                    onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     style={inputStyle}
                   >
                     <option value="user">User</option>

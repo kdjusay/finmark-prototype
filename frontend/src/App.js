@@ -10,11 +10,17 @@ import TrackOrders from './pages/TrackOrders';
 import Reports from './pages/Reports';
 import UserRoute from './components/UserRoute';
 
+// ADD THIS COMPONENT IN /src/pages/GoogleLoginSuccess.jsx
+import GoogleLoginSuccess from './pages/GoogleLoginSuccess';
+
 const App = () => (
   <Router>
     <Routes>
       <Route path="/" element={<LoginForm />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+      {/* Handle Google login redirect */}
+      <Route path="/google-login-success" element={<GoogleLoginSuccess />} />
 
       {/* Routes wrapped in sidebar layout */}
       <Route element={<MainMenuLayout />}>

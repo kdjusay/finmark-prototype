@@ -1,26 +1,17 @@
 const bcrypt = require('bcryptjs');
-const users = require('../../data/users.json');
+const pool = require('../db/mysql');
 
 exports.loginAdmin = async (req, res) => {
   const { email, password } = req.body;
-
-  // Find admin user by email
-  const admin = users.find(user => user.role === 'admin' && user.email === email);
-
-  if (!admin) {
-    return res.status(401).json({ message: 'Invalid admin credentials' });
-  }
-
-  // Check password using bcrypt
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ? AND role = "admin"', [email]);
+  if (!rows.length) return res.status(401).json({ message: 'Invalid admin credentials' });
+  const admin = rows[0];
   const isMatch = await bcrypt.compare(password, admin.password);
-  if (!isMatch) {
-    return res.status(401).json({ message: 'Invalid admin credentials' });
-  }
-
+  if (!isMatch) return res.status(401).json({ message: 'Invalid admin credentials' });
   res.json({ success: true, message: 'Admin login successful', admin });
 };
 
-exports.getAdminAccessList = (req, res) => {
-  const admins = users.filter(user => user.role === 'admin');
+exports.getAdminAccessList = async (req, res) => {
+  const [admins] = await pool.query('SELECT id, email, first_name, last_name, phone, created_at FROM users WHERE role = "admin"');
   res.json(admins);
 };
