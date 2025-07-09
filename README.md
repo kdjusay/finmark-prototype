@@ -57,7 +57,7 @@ npm run dev
 ### 3. **Database Setup**
 
 - Import the provided SQL file to MySQL.  
-- **Download SQL File:** [finmark.sql](https://drive.google.com/drive/folders/17CSOnoj-fZDQrq4V5nVumQ9m8abKZb5z?usp=sharing)
+- **Download SQL File:** [finmark.sql](https://drive.google.com/drive/folders/17CSOnoj-fZDQrq4V5nVumQ9m8abKZb5z?usp=sharing) ⬅️⬅️⬅️
 
 #### **How to Import the SQL File**
 1. Open [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) (or any MySQL GUI).
