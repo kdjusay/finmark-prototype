@@ -12,13 +12,6 @@ const LoginForm = () => {
   const [showModal, setShowModal] = useState(false);
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePassword = (password) => {
-    const hasMinLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    return hasMinLength && hasUpper && hasNumber && hasSpecial;
-  };
 
   const showModalDialog = (message) => {
     setModalMessage(message);
@@ -43,9 +36,6 @@ const LoginForm = () => {
     if (!password) {
       setPasswordError('Password is required');
       isValid = false;
-    } else if (!validatePassword(password)) {
-      setPasswordError('Password must be at least 8 chars, contain uppercase, number, and special character');
-      isValid = false;
     } else {
       setPasswordError('');
     }
@@ -61,14 +51,14 @@ const LoginForm = () => {
       .then(data => {
         if (data.success || data.message === 'Admin login successful') {
           const user = data.user || data.admin;
-          localStorage.setItem('user', JSON.stringify(user)); // ✅ Save the logged-in user
-        if (user.role === 'admin') {
-          showModalDialog('Welcome Admin!');
-          setTimeout(() => navigate('/admin/dashboard'), 1000);
-        } else {
-          showModalDialog('Login successful!');
-          setTimeout(() => navigate('/products'), 1000); // Redirect non-admin to products
-        }
+          localStorage.setItem('user', JSON.stringify(user));
+          if (user.role === 'admin') {
+            showModalDialog('Welcome Admin!');
+            setTimeout(() => navigate('/admin/dashboard'), 1000);
+          } else {
+            showModalDialog('Login successful!');
+            setTimeout(() => navigate('/products'), 1000);
+          }
         } else {
           showModalDialog(`Login failed: ${data.message}`);
         }

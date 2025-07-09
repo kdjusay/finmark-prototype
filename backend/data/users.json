@@ -14,15 +14,15 @@
   {
     "id": 2,
     "email": "johns@example.com",
-    "password": "$2a$10$CwTycUXWue0Thq9StjUM0uJ6XSr0KJXmqnSZqz6.xWm9vONqQEKfG",
+    "password": "$2a$10$ZFD8/t/g14lFgt3CO4wYHeiR/uHKo2NsO8zSd.0UGPzNjRUYh/cBC",
     "role": "user",
     "createdAt": "2024-01-15T10:30:00.000Z",
     "profile": {
-      "firstName": "Johnss",
+      "firstName": "Johns",
       "lastName": "Doe",
       "phone": "+1987654321"
     },
-    "updatedAt": "2025-07-03T04:39:08.699Z"
+    "updatedAt": "2025-07-09T16:49:43.242Z"
   },
   {
     "id": 3,
