@@ -1,70 +1,159 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# FinMark Prototype
 
-## Available Scripts
+**FinMark** is a modern SaaS prototype for SME financial management.  
+This project demonstrates a full-stack application with a secure admin/user login, dashboard management, user CRUD, reporting, and basic e-commerce modules.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🚦 System Requirements
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Operating System:** Windows 10/11, MacOS, or Linux
+- **Node.js:** v18 or higher ([Download Node.js](https://nodejs.org/))
+- **npm:** v9 or higher (included with Node.js)
+- **MySQL Community Server:** v8.x ([Download MySQL](https://dev.mysql.com/downloads/mysql/))
+- **IDE (Recommended):**  
+  - [VS Code](https://code.visualstudio.com/download)  
+  - (Or any code editor you prefer)
+- **Git** ([Download Git](https://git-scm.com/downloads))
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠️ Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. **Clone the Repository**
 
-### `npm run build`
+Open Terminal or CMD and run:
+```sh
+git clone https://github.com/kdjusay/finmark-prototype.git
+cd finmark-prototype
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 2. **Install Dependencies**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### **Frontend Setup**
 
-### `npm run eject`
+```sh
+cd frontend
+npm install
+npm start
+```
+- This starts the frontend on [http://localhost:3000](http://localhost:3000)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+#### **Backend Setup**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Open a new terminal:
+```sh
+cd backend
+npm install
+npm run dev
+```
+- This starts the backend API on [http://localhost:5000](http://localhost:5000)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 3. **Database Setup**
 
-## Learn More
+- Import the provided SQL file to MySQL.  
+- **Download SQL File:** [finmark.sql](https://drive.google.com/drive/folders/17CSOnoj-fZDQrq4V5nVumQ9m8abKZb5z?usp=sharing) ⬅️⬅️⬅️
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### **How to Import the SQL File**
+1. Open [MySQL Workbench](https://dev.mysql.com/downloads/workbench/) (or any MySQL GUI).
+2. Create a new database, e.g. `finmark_db`.
+3. Go to **File → Open SQL Script**, select the `finmark.sql`, and execute the script (lightning bolt/run button).
+4. Confirm that the `users` table and initial data are created.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+### 4. **Open in IDE**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+1. **Open VS Code** (or your preferred IDE).
+2. **Open Folder:**  
+   Go to **File → Open Folder**, then select the `finmark-prototype` folder.
+3. You can now edit both `frontend` and `backend` folders.
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🚪 **Login Credentials (Default)**
 
-### Making a Progressive Web App
+All user accounts use the same password unless changed by admin.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- **Default Password:** `Finmark@2025`
 
-### Advanced Configuration
+### **Sample Accounts**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+| Email               | Role   | First Name | Last Name | Phone        |
+|---------------------|--------|------------|-----------|-------------|
+| admin@finmark.com   | admin  | Admin      | User      | +1234567890 |
+| johns@finmark.com   | user   | John       | Doe       | +1987654321 |
+| jane@finmark.com    | user   | Jane       | Smith     | +1555666777 |
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 📋 **System Modules & Functionalities**
 
-### `npm run build` fails to minify
+### 1. **Login Page** (100% Functional)
+- Email/password authentication
+- Google OAuth login (if enabled)
+- Instant error messages
+- Role-based redirection after login
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 2. **Admin Dashboard** (100% Functional)
+- View all users in table format
+- Search/filter users by name/email
+- Create new user (admin/user/demo)
+- Edit user (update info, reset password)
+- Delete user (except main admin)
+- Logout and session control
+
+### 3. **User Dashboard** (Prototype)
+- View personal profile and information
+- Basic navigation to other modules (products, orders, feedback)
+- Logout and session control
+
+### 4. **Reports Page** (Prototype)
+- Placeholder for business and financial reports
+- Accessible for admin (planned for future data)
+
+### 5. **Checkout** (Prototype)
+- View items added to cart
+- Submit checkout/order (future integration with products/orders)
+
+### 6. **Products** (Prototype)
+- Browse list of available products
+- Product details (limited)
+
+### 7. **Orders** (Prototype)
+- View order history and status
+- Basic order status tracking
+
+### 8. **Feedback** (Prototype)
+- Submit user concerns or feedback to admin
+- All feedback is logged (planned for admin review module)
+
+---
+
+## 🧩 **Tech Stack Overview**
+
+- **Frontend:** React (with Context API, hooks, and custom styling)
+- **Backend:** Node.js, Express
+- **Database:** MySQL
+- **Authentication:** JWT, bcrypt password hashing
+- **Styling:** Pure CSS-in-JS (no external frameworks, fast loading)
+- **API:** RESTful JSON endpoints
+
+---
+
+## ℹ️ **Additional Notes**
+
+- All source code is under the `frontend` and `backend` directories.
+- For any environment variables (API URLs, database configs), refer to `.env.example` in each directory. **Do not commit real secrets.**
+- Google OAuth requires a valid client ID, set via environment variables (ask the project admin if not provided).
+
+---
+
+## 📬 **Support / Questions**
+
+For setup or usage issues, please [open an issue](https://github.com/kdjusay/finmark-prototype/issues) or contact the repository owner.
