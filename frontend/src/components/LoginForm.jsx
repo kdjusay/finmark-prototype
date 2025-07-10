@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// --- LoginForm with Rate Limiting Lockout Messaging ---
 const LoginForm = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('login');
@@ -64,6 +65,9 @@ const LoginForm = () => {
             showModalDialog('Login successful!');
             setTimeout(() => navigate('/products'), 1000);
           }
+        } else if (data.message && data.message.includes('Account locked')) {
+          // Show lockout message
+          showModalDialog(data.message);
         } else {
           showModalDialog(`Login failed: ${data.message}`);
         }
@@ -143,7 +147,7 @@ const LoginForm = () => {
   );
 };
 
-// ======= Registration Form =======
+// ======= Registration Form remains unchanged =======
 function RegisterForm({ onSuccess }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
