@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// --- LoginForm with Rate Limiting Lockout Messaging ---
+// --- LoginForm with Correct Error Handling and Phone Formatting ---
 const LoginForm = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('login');
@@ -17,36 +17,28 @@ const LoginForm = () => {
     window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/google`;
   };
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-
-  const showModalDialog = (message) => {
-    setModalMessage(message);
-    setShowModal(true);
+  // --- Validators ---
+  const validateEmail = (value) => {
+    if (!value) return 'Email is required';
+    if (!/\S+@\S+\.\S+/.test(value)) return 'Please enter a valid email address (e.g. your@email.com)';
+    return '';
+  };
+  const validatePassword = (value) => {
+    if (!value) return 'Password is required';
+    if (value.length < 8) return 'Password must be at least 8 characters';
+    return '';
   };
 
+  // On submit: validate all, and show errors if any
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let isValid = true;
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+    setEmailError(eErr);
+    setPasswordError(pErr);
 
-    if (!email) {
-      setEmailError('Email is required');
-      isValid = false;
-    } else if (!validateEmail(email)) {
-      setEmailError('Invalid email format');
-      isValid = false;
-    } else {
-      setEmailError('');
-    }
-
-    if (!password) {
-      setPasswordError('Password is required');
-      isValid = false;
-    } else {
-      setPasswordError('');
-    }
-
-    if (!isValid) return;
+    if (eErr || pErr) return;
 
     fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
       method: 'POST',
@@ -66,7 +58,6 @@ const LoginForm = () => {
             setTimeout(() => navigate('/products'), 1000);
           }
         } else if (data.message && data.message.includes('Account locked')) {
-          // Show lockout message
           showModalDialog(data.message);
         } else {
           showModalDialog(`Login failed: ${data.message}`);
@@ -76,6 +67,21 @@ const LoginForm = () => {
         console.error('Login error:', error);
         showModalDialog('An error occurred during login.');
       });
+  };
+
+  const showModalDialog = (message) => {
+    setModalMessage(message);
+    setShowModal(true);
+  };
+
+  // Clear errors when user starts typing again
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (emailError) setEmailError('');
+  };
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (passwordError) setPasswordError('');
   };
 
   return (
@@ -94,7 +100,7 @@ const LoginForm = () => {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 style={{ ...inputStyle, borderColor: emailError ? 'red' : '#ccc' }}
                 autoComplete="username"
               />
@@ -105,7 +111,7 @@ const LoginForm = () => {
               <input
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 style={{ ...inputStyle, borderColor: passwordError ? 'red' : '#ccc' }}
                 autoComplete="current-password"
               />
@@ -147,37 +153,79 @@ const LoginForm = () => {
   );
 };
 
-// ======= Registration Form remains unchanged =======
+// ======= Registration Form: Only Show Error After Submit; confirmPassword Unlock; Industry Standard Phone =======
 function RegisterForm({ onSuccess }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [role] = useState('user');
-
-  // Errors
   const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
-  const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
-  const validatePhone = (val) => /^(\+?\d{10,15})$/.test(val);
+  // Regex patterns
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+  const namePattern = /^[A-Za-z\s'-]{2,50}$/;
+  const lastNamePattern = /^[A-Za-z\s'-]{2,30}$/;
+  // At least 8 chars, 1 upper, 1 lower, 1 number, 1 symbol
+  const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  function formatPhone(value) {
+    let v = value.replace(/[^\d+]/g, '');
+    if (v.startsWith('09')) v = '+639' + v.slice(2);
+    else if (v.startsWith('9')) v = '+639' + v.slice(1);
+    else if (v.startsWith('639')) v = '+639' + v.slice(3);
+    else if (v.startsWith('+63')) v = '+63' + v.slice(3);
+    else if (!v.startsWith('+639')) v = '+639';
+
+    v = v.slice(0, 13);
+    return v;
+  }
+
+  // Only show errors if submitted
+  const validate = () => {
+    const newErrors = {};
+    if (!firstName) newErrors.firstName = 'First name is required';
+    else if (!namePattern.test(firstName)) newErrors.firstName = 'First name must contain only letters and spaces';
+    else if (firstName.length < 2) newErrors.firstName = 'First name too short';
+
+    if (!lastName) newErrors.lastName = 'Last name is required';
+    else if (!lastNamePattern.test(lastName)) newErrors.lastName = 'Last name must contain only letters and spaces';
+    else if (lastName.length < 2) newErrors.lastName = 'Last name too short';
+
+    if (!email) newErrors.email = 'Email is required';
+    else if (!emailPattern.test(email)) newErrors.email = 'Invalid email address';
+
+    if (!phone) newErrors.phone = 'Phone number is required';
+    else if (!/^\+639\d{9}$/.test(phone)) newErrors.phone = 'Phone must be +639XXXXXXXXX';
+
+    if (!password) newErrors.password = 'Password is required';
+    else if (!passwordPattern.test(password)) newErrors.password = 'Password must be at least 8 chars, upper, lower, number, symbol';
+
+    // Only validate confirmPassword if password field is valid
+    if (passwordPattern.test(password)) {
+      if (!confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
+      else if (confirmPassword !== password) newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    return newErrors;
+  };
+
+  // Phone onChange (live formatting)
+  const handlePhoneChange = (value) => {
+    setPhone(formatPhone(value));
+    if (errors.phone) setErrors(e => ({ ...e, phone: undefined }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newErrors = {};
-    if (!firstName) newErrors.firstName = 'Required';
-    if (!lastName) newErrors.lastName = 'Required';
-    if (!email) newErrors.email = 'Required';
-    else if (!validateEmail(email)) newErrors.email = 'Invalid email format';
-    if (!phone) newErrors.phone = 'Required';
-    else if (!validatePhone(phone)) newErrors.phone = 'Invalid phone. Use +639XXXXXXXXX or 09XXXXXXXXX';
-    if (!password) newErrors.password = 'Required';
-    else if (password.length < 8) newErrors.password = 'At least 8 characters';
-
+    setSubmitted(true);
+    const newErrors = validate();
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) return;
+    if (Object.values(newErrors).length > 0) return;
 
-    // API register call
     fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -195,10 +243,10 @@ function RegisterForm({ onSuccess }) {
         if (data.success) {
           onSuccess(data.user);
         } else {
-          setErrors({ form: data.message || 'Registration failed.' });
+          setErrors(e => ({ ...e, form: data.message || 'Registration failed.' }));
         }
       })
-      .catch(() => setErrors({ form: 'Error: could not register.' }));
+      .catch(() => setErrors(e => ({ ...e, form: 'Error: could not register.' })));
   };
 
   return (
@@ -210,22 +258,22 @@ function RegisterForm({ onSuccess }) {
         <input
           type="text"
           value={firstName}
-          onChange={e => setFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-          style={{ ...inputStyle, borderColor: errors.firstName ? 'red' : '#ccc' }}
+          onChange={e => setFirstName(e.target.value.replace(/[^A-Za-z\s'-]/g, '').slice(0, 50))}
           autoComplete="given-name"
+          style={{ ...inputStyle, borderColor: submitted && errors.firstName ? 'red' : '#ccc' }}
         />
-        {errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
+        {submitted && errors.firstName && <p style={errorStyle}>{errors.firstName}</p>}
       </div>
       <div style={fieldGroupStyle}>
         <label>Last Name:</label>
         <input
           type="text"
           value={lastName}
-          onChange={e => setLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-          style={{ ...inputStyle, borderColor: errors.lastName ? 'red' : '#ccc' }}
+          onChange={e => setLastName(e.target.value.replace(/[^A-Za-z\s'-]/g, '').slice(0, 30))}
           autoComplete="family-name"
+          style={{ ...inputStyle, borderColor: submitted && errors.lastName ? 'red' : '#ccc' }}
         />
-        {errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
+        {submitted && errors.lastName && <p style={errorStyle}>{errors.lastName}</p>}
       </div>
       <div style={fieldGroupStyle}>
         <label>Email:</label>
@@ -233,29 +281,23 @@ function RegisterForm({ onSuccess }) {
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          style={{ ...inputStyle, borderColor: errors.email ? 'red' : '#ccc' }}
           autoComplete="email"
+          style={{ ...inputStyle, borderColor: submitted && errors.email ? 'red' : '#ccc' }}
         />
-        {errors.email && <p style={errorStyle}>{errors.email}</p>}
+        {submitted && errors.email && <p style={errorStyle}>{errors.email}</p>}
       </div>
       <div style={fieldGroupStyle}>
-        <label>Phone:</label>
+        <label>Phone (+639XXXXXXXXX):</label>
         <input
           type="tel"
           value={phone}
           placeholder="e.g. +639171234567"
-          onChange={e => {
-            let raw = e.target.value;
-            // Accepts only digits and leading +
-            raw = raw.replace(/(?!^\+)[^0-9]/g, '');
-            setPhone(raw);
-            if (errors.phone) setErrors({ ...errors, phone: '' });
-          }}
-          maxLength={16}
-          style={{ ...inputStyle, borderColor: errors.phone ? 'red' : '#ccc' }}
+          onChange={e => handlePhoneChange(e.target.value)}
+          maxLength={13}
           autoComplete="tel"
+          style={{ ...inputStyle, borderColor: submitted && errors.phone ? 'red' : '#ccc' }}
         />
-        {errors.phone && <p style={errorStyle}>{errors.phone}</p>}
+        {submitted && errors.phone && <p style={errorStyle}>{errors.phone}</p>}
       </div>
       <div style={fieldGroupStyle}>
         <label>Password:</label>
@@ -263,10 +305,28 @@ function RegisterForm({ onSuccess }) {
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          style={{ ...inputStyle, borderColor: errors.password ? 'red' : '#ccc' }}
           autoComplete="new-password"
+          placeholder="Min 8 chars, upper, lower, number, symbol"
+          style={{ ...inputStyle, borderColor: submitted && errors.password ? 'red' : '#ccc' }}
         />
-        {errors.password && <p style={errorStyle}>{errors.password}</p>}
+        {submitted && errors.password && <p style={errorStyle}>{errors.password}</p>}
+      </div>
+      <div style={fieldGroupStyle}>
+        <label>Confirm Password:</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
+          disabled={!passwordPattern.test(password)}
+          autoComplete="off"
+          style={{
+            ...inputStyle,
+            borderColor: submitted && errors.confirmPassword ? 'red' : '#ccc',
+            background: !passwordPattern.test(password) ? '#eee' : '#fff',
+            cursor: !passwordPattern.test(password) ? 'not-allowed' : 'text'
+          }}
+        />
+        {submitted && errors.confirmPassword && <p style={errorStyle}>{errors.confirmPassword}</p>}
       </div>
       <button type="submit" style={buttonStyle}>Register</button>
     </form>
