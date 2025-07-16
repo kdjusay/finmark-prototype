@@ -87,7 +87,7 @@ All user accounts use the same password unless changed by admin.
 | Email               | Role   | First Name | Last Name | Phone        |
 |---------------------|--------|------------|-----------|-------------|
 | admin@finmark.com   | admin  | Admin      | User      | +1234567890 |
-| johns@finmark.com   | user   | John       | Doe       | +1987654321 |
+| john@finmark.com   | user   | John       | Doe       | +1987654321 |
 | jane@finmark.com    | user   | Jane       | Smith     | +1555666777 |
 
 ---
