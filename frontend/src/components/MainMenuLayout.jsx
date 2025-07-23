@@ -20,6 +20,7 @@ const MainMenuLayout = () => {
           <Link to="/track">🚚 Track Orders</Link>
           <Link to="/feedback">💬 Feedback</Link>
           <Link to="/reports">📊 Reports</Link>
+          <Link to="/settings">🔒 Account Settings</Link> 
         </nav>
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </aside>

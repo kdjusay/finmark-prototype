@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const pool = require('../db/mysql');
+const pool = require('../db/mysql'); // Correct relative path for your src/controllers/*.js
 
 exports.loginAdmin = async (req, res) => {
   const { email, password } = req.body;

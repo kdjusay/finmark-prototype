@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login } = require('../controllers/auth.controller');
+const { login, verify2FA } = require('../controllers/auth.controller');
 
 /**
  * @route   POST /api/login
@@ -8,5 +8,6 @@ const { login } = require('../controllers/auth.controller');
  * @access  Public
  */
 router.post('/', login);
+router.post('/verify-2fa', verify2FA);
 
 module.exports = router;

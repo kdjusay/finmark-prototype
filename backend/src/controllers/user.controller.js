@@ -3,10 +3,13 @@ const pool = require('../db/mysql');
 
 const getUserById = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT id, email, role, created_at, updated_at, first_name, last_name, phone FROM users WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query(
+      'SELECT id, email, role, created_at, updated_at, first_name, last_name, phone, is_2fa_enabled FROM users WHERE id = ?', [req.params.id]);
     if (!rows.length) return res.status(404).json({ success: false, message: 'User not found' });
     res.json({ success: true, user: rows[0] });
-  } catch (err) { res.status(500).json({ success: false, message: 'Internal server error' }); }
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };
 
 const getAllUsers = async (req, res) => {

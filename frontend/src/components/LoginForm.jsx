@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// --- LoginForm with Correct Error Handling and Phone Formatting ---
+// --- LoginForm with Correct Error Handling, 2FA, and Phone Formatting ---
 const LoginForm = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('login');
@@ -11,6 +11,11 @@ const LoginForm = () => {
   const [passwordError, setPasswordError] = useState('');
   const [modalMessage, setModalMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
+
+  // 2FA states
+  const [pending2FA, setPending2FA] = useState(null); // { userId, email }
+  const [twoFACode, setTwoFACode] = useState('');
+  const [twoFAError, setTwoFAError] = useState('');
 
   // Google OAuth login: redirect to backend
   const handleGoogleLogin = () => {
@@ -33,6 +38,7 @@ const LoginForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    setTwoFAError('');
     const eErr = validateEmail(email);
     const pErr = validatePassword(password);
     setEmailError(eErr);
@@ -57,6 +63,10 @@ const LoginForm = () => {
             showModalDialog('Login successful!');
             setTimeout(() => navigate('/products'), 1000);
           }
+        } else if (data.requires2FA) {
+          setPending2FA({ userId: data.userId, email: data.email });
+          setModalMessage('A 2FA code was sent to your email.');
+          setShowModal(true);
         } else if (data.message && data.message.includes('Account locked')) {
           showModalDialog(data.message);
         } else {
@@ -66,6 +76,32 @@ const LoginForm = () => {
       .catch(error => {
         console.error('Login error:', error);
         showModalDialog('An error occurred during login.');
+      });
+  };
+
+  // 2FA code submit
+  const handle2FASubmit = (e) => {
+    e.preventDefault();
+    if (!twoFACode.match(/^\d{6}$/)) {
+      setTwoFAError('Code must be 6 digits');
+      return;
+    }
+    fetch(`${process.env.REACT_APP_API_URL}/api/login/verify-2fa`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: pending2FA.userId, code: twoFACode })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          showModalDialog('2FA successful! Logging in...');
+          setTimeout(() => navigate('/products'), 1000);
+          setPending2FA(null);
+          setTwoFACode('');
+        } else {
+          setTwoFAError(data.message || 'Invalid or expired code');
+        }
       });
   };
 
@@ -140,6 +176,39 @@ const LoginForm = () => {
           />
         )}
       </div>
+
+      {/* 2FA Modal - IMPROVED UI */}
+      {pending2FA && (
+        <div style={modalOverlay}>
+          <div style={modalBox2FA}>
+            <div style={modalIcon2FA}>🔑</div>
+            <div style={modalText2FA}>
+              Enter the 6-digit code sent to<br />
+              <b>{pending2FA.email}</b>
+            </div>
+            <form onSubmit={handle2FASubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <input
+                type="text"
+                maxLength={6}
+                value={twoFACode}
+                onChange={e => {
+                  setTwoFACode(e.target.value.replace(/\D/g, ''));
+                  setTwoFAError('');
+                }}
+                style={modalInput2FA}
+                autoFocus
+              />
+              {twoFAError && <div style={errorStyle}>{twoFAError}</div>}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', marginTop: '10px' }}>
+                <button type="submit" style={modalButton2FA}>Verify</button>
+                <button type="button" onClick={() => { setPending2FA(null); setTwoFACode(''); }} style={{ ...modalButton2FA, backgroundColor: '#6c757d' }}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Regular Modal */}
       {showModal && (
         <div style={modalOverlay}>
           <div style={modalBox}>
@@ -153,7 +222,7 @@ const LoginForm = () => {
   );
 };
 
-// ======= Registration Form: Only Show Error After Submit; confirmPassword Unlock; Industry Standard Phone =======
+// ======= Registration Form (unchanged) =======
 function RegisterForm({ onSuccess }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -430,6 +499,7 @@ const modalOverlay = {
   backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center',
   alignItems: 'center', zIndex: 999,
 };
+// Original modalBox, modalIcon, modalText, modalButton still used for regular modals:
 const modalBox = {
   backgroundColor: '#fff', padding: '30px', borderRadius: '10px',
   textAlign: 'center', width: '300px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
@@ -439,6 +509,55 @@ const modalText = { fontSize: '16px', marginBottom: '20px' };
 const modalButton = {
   backgroundColor: '#4c91af', color: 'white', padding: '8px 20px',
   border: 'none', borderRadius: '4px', cursor: 'pointer'
+};
+// ==== NEW: Improved 2FA Modal Styles ====
+const modalBox2FA = {
+  backgroundColor: '#fff',
+  padding: '36px 38px 32px 38px',
+  borderRadius: '12px',
+  textAlign: 'center',
+  width: '370px',
+  boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+};
+const modalIcon2FA = {
+  fontSize: '38px',
+  marginBottom: '20px'
+};
+const modalText2FA = {
+  fontSize: '17px',
+  marginBottom: '20px',
+  color: '#2b2e33',
+  fontWeight: 500,
+  lineHeight: 1.4,
+  textAlign: 'center',
+};
+const modalInput2FA = {
+  width: '100%',
+  maxWidth: '200px',
+  fontSize: '28px',
+  letterSpacing: '9px',
+  textAlign: 'center',
+  padding: '12px 0',
+  margin: '18px 0 25px 0',
+  border: '1.5px solid #4c91af',
+  borderRadius: '6px',
+  outline: 'none',
+  background: '#f5f7fa',
+  fontWeight: 'bold',
+};
+const modalButton2FA = {
+  backgroundColor: '#4c91af',
+  color: 'white',
+  padding: '12px 24px',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+  fontSize: '16px',
+  margin: '0 10px'
 };
 
 export default LoginForm;

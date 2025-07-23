@@ -9,6 +9,7 @@ import Feedback from './pages/Feedback';
 import TrackOrders from './pages/TrackOrders';
 import Reports from './pages/Reports';
 import UserRoute from './components/UserRoute';
+import UserSettings from './pages/UserSettings';
 
 // ADD THIS COMPONENT IN /src/pages/GoogleLoginSuccess.jsx
 import GoogleLoginSuccess from './pages/GoogleLoginSuccess';
@@ -29,6 +30,7 @@ const App = () => (
         <Route path="/track" element={<UserRoute><TrackOrders /></UserRoute>} />
         <Route path="/feedback" element={<UserRoute><Feedback /></UserRoute>} />
         <Route path="/reports" element={<UserRoute><Reports /></UserRoute>} />
+        <Route path="/settings" element={<UserRoute><UserSettings /></UserRoute>} />
       {/* Add more pages here like Checkout, Feedback, etc. */}
       </Route>
     </Routes>

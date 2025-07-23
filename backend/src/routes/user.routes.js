@@ -8,6 +8,7 @@ const {
   deleteUser, 
   searchUsers 
 } = require('../controllers/user.controller');
+const { update2FA } = require('../controllers/auth.controller'); // <-- Add this
 
 /**
  * @route   GET /api/users/search
@@ -50,5 +51,12 @@ router.put('/:id', updateUser);
  * @access  Public
  */
 router.delete('/:id', deleteUser);
+
+/**
+ * @route   PUT /api/users/:id/2fa
+ * @desc    Enable or disable 2FA for a user
+ * @access  Authenticated (should restrict in middleware)
+ */
+router.put('/:id/2fa', update2FA);
 
 module.exports = router;
