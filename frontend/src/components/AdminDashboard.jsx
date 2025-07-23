@@ -1,4 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+
+const ROLES = [
+  { value: 'employee', label: 'Employee', color: '#28a745' },
+  { value: 'admin', label: 'Admin', color: '#007bff' },
+  { value: 'guest', label: 'Guest', color: '#6c757d' },
+  { value: 'executive', label: 'Executive', color: '#8b5cf6' },
+  { value: 'manager', label: 'Manager', color: '#f59e42' },
+  { value: 'finance', label: 'Finance', color: '#2196f3' },
+  { value: 'hr', label: 'HR', color: '#e83e8c' }
+];
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -11,18 +21,17 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
-  // Flat fields only
   const [newUser, setNewUser] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     phone: '',
-    role: 'user'
+    role: 'employee'
   });
 
-  // Fetch users
-  const fetchUsers = async () => {
+  // --- Fetch users, memoized for lint compliance ---
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/users`);
@@ -35,14 +44,16 @@ const AdminDashboard = () => {
         phone: u.phone || '',
         role: u.role
       })));
-    } catch (err) {
+    } catch {
       showMessage('Failed to fetch users', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]); // no warning
 
   const showMessage = (msg, type) => {
     setMessage(msg);
@@ -90,7 +101,7 @@ const AdminDashboard = () => {
       if (data.success) {
         showMessage('User created successfully', 'success');
         setShowCreateModal(false);
-        setNewUser({ email: '', password: '', firstName: '', lastName: '', phone: '', role: 'user' });
+        setNewUser({ email: '', password: '', firstName: '', lastName: '', phone: '', role: 'employee' });
         fetchUsers();
       } else {
         showMessage(data.message || 'Failed to create user', 'error');
@@ -135,7 +146,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Always flat fields
   const openEditModal = (user) => {
     setEditingUser({
       id: user.id,
@@ -227,7 +237,7 @@ const AdminDashboard = () => {
                 <td style={tdStyle}>
                   <span style={{
                     ...roleStyle,
-                    backgroundColor: u.role === 'admin' ? '#007bff' : u.role === 'demo' ? '#ffc107' : '#28a745'
+                    backgroundColor: ROLES.find(r => r.value === u.role)?.color || '#bdbdbd'
                   }}>
                     {u.role}
                   </span>
@@ -330,9 +340,9 @@ const AdminDashboard = () => {
                     onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                     style={inputStyle}
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="demo">Demo</option>
+                    {ROLES.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -416,9 +426,9 @@ const AdminDashboard = () => {
                     onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
                     style={inputStyle}
                   >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="demo">Demo</option>
+                    {ROLES.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -452,212 +462,33 @@ const AdminDashboard = () => {
   );
 };
 
-// === STYLES ===
-const dashboardContainer = {
-  fontFamily: 'sans-serif',
-  backgroundColor: '#f9f9f9',
-  minHeight: '100vh',
-};
-
-const headerBar = {
-  backgroundColor: '#4c91af',
-  padding: '15px 30px',
-  color: '#fff',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
-
-const companyTitle = {
-  fontSize: '20px',
-  fontWeight: 'bold',
-};
-
-const logoutBtn = {
-  backgroundColor: '#fff',
-  color: '#4c91af',
-  border: '1px solid #4c91af',
-  borderRadius: '4px',
-  padding: '6px 12px',
-  cursor: 'pointer',
-};
-
-const contentBox = {
-  padding: '40px 60px',
-};
-
-const sectionTitle = {
-  marginBottom: '25px',
-  fontSize: '24px',
-  fontWeight: 'bold',
-};
-
-const tableTitle = {
-  fontWeight: 'bold',
-  marginBottom: '15px',
-  marginTop: '10px',
-};
-
-const topBar = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: '20px',
-  marginBottom: '25px',
-};
-
-const searchInput = {
-  flex: 1,
-  padding: '10px',
-  borderRadius: '4px',
-  border: '1px solid #ccc',
-  fontSize: '14px',
-};
-
-const createBtn = {
-  backgroundColor: '#4c91af',
-  color: 'white',
-  border: 'none',
-  padding: '10px 16px',
-  borderRadius: '4px',
-  fontSize: '14px',
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
-};
-
-const messageStyle = {
-  padding: '10px 15px',
-  borderRadius: '4px',
-  border: '1px solid',
-  marginBottom: '15px',
-  fontSize: '14px',
-};
-
-const loadingStyle = {
-  textAlign: 'center',
-  padding: '20px',
-  fontSize: '16px',
-  color: '#666',
-};
-
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  backgroundColor: '#fff',
-  border: '1px solid #e0e0e0',
-};
-
-const thStyle = {
-  textAlign: 'left',
-  padding: '12px',
-  backgroundColor: '#f2f2f2',
-  borderBottom: '1px solid #ddd',
-};
-
-const tdStyle = {
-  padding: '12px',
-  borderBottom: '1px solid #eee',
-  verticalAlign: 'top',
-};
-
-const roleStyle = {
-  padding: '4px 8px',
-  borderRadius: '12px',
-  color: 'white',
-  fontSize: '12px',
-  fontWeight: 'bold',
-  textTransform: 'uppercase',
-};
-
-const actionBtn = {
-  marginRight: '10px',
-  backgroundColor: '#f0ad4e',
-  border: 'none',
-  color: 'white',
-  padding: '6px 12px',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-const deleteBtn = {
-  backgroundColor: '#d9534f',
-  border: 'none',
-  color: 'white',
-  padding: '6px 12px',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-// Modal styles
-const modalOverlay = {
-  position: 'fixed',
-  top: 0, left: 0, right: 0, bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-};
-
-const modalBox = {
-  backgroundColor: '#fff',
-  padding: '20px',
-  borderRadius: '8px',
-  width: '300px',
-};
-
-const largeModalBox = {
-  backgroundColor: '#fff',
-  padding: '30px',
-  borderRadius: '8px',
-  width: '600px',
-  maxHeight: '80vh',
-  overflowY: 'auto',
-};
-
-const formRow = {
-  display: 'flex',
-  gap: '20px',
-  marginBottom: '20px',
-};
-
-const formGroup = {
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-};
-
-const inputStyle = {
-  padding: '8px 12px',
-  border: '1px solid #ddd',
-  borderRadius: '4px',
-  fontSize: '14px',
-  marginTop: '5px',
-};
-
-const modalActions = {
-  marginTop: '20px',
-  display: 'flex',
-  justifyContent: 'flex-end',
-  gap: '10px',
-};
-
-const confirmButton = {
-  backgroundColor: '#4c91af',
-  color: 'white',
-  padding: '8px 16px',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-const cancelButton = {
-  backgroundColor: '#6c757d',
-  color: 'white',
-  padding: '8px 16px',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
+// === STYLES === (same as your original)
+const dashboardContainer = { fontFamily: 'sans-serif', backgroundColor: '#f9f9f9', minHeight: '100vh' };
+const headerBar = { backgroundColor: '#4c91af', padding: '15px 30px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
+const companyTitle = { fontSize: '20px', fontWeight: 'bold' };
+const logoutBtn = { backgroundColor: '#fff', color: '#4c91af', border: '1px solid #4c91af', borderRadius: '4px', padding: '6px 12px', cursor: 'pointer' };
+const contentBox = { padding: '40px 60px' };
+const sectionTitle = { marginBottom: '25px', fontSize: '24px', fontWeight: 'bold' };
+const tableTitle = { fontWeight: 'bold', marginBottom: '15px', marginTop: '10px' };
+const topBar = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', marginBottom: '25px' };
+const searchInput = { flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc', fontSize: '14px' };
+const createBtn = { backgroundColor: '#4c91af', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '4px', fontSize: '14px', cursor: 'pointer', whiteSpace: 'nowrap' };
+const messageStyle = { padding: '10px 15px', borderRadius: '4px', border: '1px solid', marginBottom: '15px', fontSize: '14px' };
+const loadingStyle = { textAlign: 'center', padding: '20px', fontSize: '16px', color: '#666' };
+const tableStyle = { width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff', border: '1px solid #e0e0e0' };
+const thStyle = { textAlign: 'left', padding: '12px', backgroundColor: '#f2f2f2', borderBottom: '1px solid #ddd' };
+const tdStyle = { padding: '12px', borderBottom: '1px solid #eee', verticalAlign: 'top' };
+const roleStyle = { padding: '4px 8px', borderRadius: '12px', color: 'white', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' };
+const actionBtn = { marginRight: '10px', backgroundColor: '#f0ad4e', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' };
+const deleteBtn = { backgroundColor: '#d9534f', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' };
+const modalOverlay = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
+const modalBox = { backgroundColor: '#fff', padding: '20px', borderRadius: '8px', width: '300px' };
+const largeModalBox = { backgroundColor: '#fff', padding: '30px', borderRadius: '8px', width: '600px', maxHeight: '80vh', overflowY: 'auto' };
+const formRow = { display: 'flex', gap: '20px', marginBottom: '20px' };
+const formGroup = { flex: 1, display: 'flex', flexDirection: 'column' };
+const inputStyle = { padding: '8px 12px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '14px', marginTop: '5px' };
+const modalActions = { marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' };
+const confirmButton = { backgroundColor: '#4c91af', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer' };
+const cancelButton = { backgroundColor: '#6c757d', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer' };
 
 export default AdminDashboard;

@@ -1,6 +1,10 @@
 const bcrypt = require('bcryptjs');
 const pool = require('../db/mysql');
 
+const allowedRoles = [
+  'admin', 'employee', 'guest', 'executive', 'manager', 'finance', 'hr'
+];
+
 const getUserById = async (req, res) => {
   try {
     const [rows] = await pool.query(
@@ -21,23 +25,25 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { email, password, role = 'user', firstName, lastName, phone } = req.body;
+    const { email, password, role, firstName, lastName, phone } = req.body;
     if (!email || !password || !firstName || !lastName)
       return res.status(400).json({ success: false, message: 'Missing fields' });
+
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length) return res.status(409).json({ success: false, message: 'User already exists' });
 
+    // Role validation
+    const finalRole = role && allowedRoles.includes(role) ? role : 'guest';
     const hashed = await bcrypt.hash(password, 10);
     const [result] = await pool.query(
       `INSERT INTO users (email, password, role, first_name, last_name, phone) VALUES (?, ?, ?, ?, ?, ?)`,
-      [email, hashed, role, firstName, lastName, phone || null]
+      [email, hashed, finalRole, firstName, lastName, phone || null]
     );
     const [userRow] = await pool.query('SELECT id, email, role, created_at, updated_at, first_name, last_name, phone FROM users WHERE id = ?', [result.insertId]);
     res.status(201).json({ success: true, user: userRow[0] });
   } catch (err) { res.status(500).json({ success: false, message: 'Internal server error' }); }
 };
 
-// THE FIXED UPDATE
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -53,7 +59,10 @@ const updateUser = async (req, res) => {
     if (firstName !== undefined)  { updates.push('first_name = ?');   params.push(firstName); }
     if (lastName !== undefined)   { updates.push('last_name = ?');    params.push(lastName); }
     if (phone !== undefined)      { updates.push('phone = ?');        params.push(phone); }
-    if (role !== undefined)       { updates.push('role = ?');         params.push(role); }
+    if (role !== undefined) {
+      if (!allowedRoles.includes(role)) return res.status(400).json({ success: false, message: 'Invalid role' });
+      updates.push('role = ?');   params.push(role);
+    }
     if (password) {
       const hashed = await bcrypt.hash(password, 10);
       updates.push('password = ?');

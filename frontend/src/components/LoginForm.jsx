@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import googleLogo from '../assets/google-logo.png'; // Make sure the path is correct
 
-// --- LoginForm with Correct Error Handling, 2FA, and Phone Formatting ---
+// --- LoginForm with Error Handling, 2FA, and Full Role-based Routing ---
 const LoginForm = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('login');
@@ -56,9 +57,26 @@ const LoginForm = () => {
         if (data.success || data.message === 'Admin login successful') {
           const user = data.user || data.admin;
           localStorage.setItem('user', JSON.stringify(user));
+          // === ROLE-BASED NAVIGATION LOGIC ===
           if (user.role === 'admin') {
             showModalDialog('Welcome Admin!');
             setTimeout(() => navigate('/admin/dashboard'), 1000);
+          } else if (user.role === 'employee') {
+            showModalDialog('Login successful!');
+            setTimeout(() => navigate('/products'), 1000);
+          } else if (user.role === 'guest') {
+            showModalDialog('Login successful! Welcome, Guest.');
+            setTimeout(() => navigate('/guest'), 1000);
+          } else if (
+            user.role === 'executive' ||
+            user.role === 'manager' ||
+            user.role === 'finance'
+          ) {
+            showModalDialog('Login successful! Welcome.');
+            setTimeout(() => navigate('/reports'), 1000);
+          } else if (user.role === 'hr') {
+            showModalDialog('Welcome HR!');
+            setTimeout(() => navigate('/hr/dashboard'), 1000);
           } else {
             showModalDialog('Login successful!');
             setTimeout(() => navigate('/products'), 1000);
@@ -161,7 +179,19 @@ const LoginForm = () => {
               onClick={handleGoogleLogin}
               title="Sign in with Google"
             >
-              <span style={{ marginRight: 10 }}>🔵</span>
+              <img
+                src={googleLogo}
+                alt="Google Logo"
+                style={{
+                  width: 22,
+                  height: 22,
+                  marginRight: 10,
+                  verticalAlign: 'middle',
+                  objectFit: 'contain',
+                  display: 'inline-block'
+                }}
+                draggable={false}
+              />
               Continue with Google
             </button>
           </form>
@@ -222,7 +252,7 @@ const LoginForm = () => {
   );
 };
 
-// ======= Registration Form (unchanged) =======
+// ======= Registration Form (unchanged, but included in full for completeness) =======
 function RegisterForm({ onSuccess }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -402,7 +432,7 @@ function RegisterForm({ onSuccess }) {
   );
 }
 
-// ========== Styles ==========
+// ========== Styles (Unchanged, included for reference) ==========
 const pageCenterStyle = {
   minHeight: '100vh',
   display: 'flex',
@@ -489,7 +519,12 @@ const googleBtnStyle = {
   color: '#333',
   border: '1px solid #b4d4e7',
   marginTop: '10px',
-  marginBottom: '0'
+  marginBottom: '0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 0,
+  fontWeight: 500
 };
 const fieldGroupStyle = { marginBottom: '10px', textAlign: 'left' };
 const errorStyle = { color: 'red', fontSize: '12px', marginTop: '2px' };
@@ -499,7 +534,6 @@ const modalOverlay = {
   backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center',
   alignItems: 'center', zIndex: 999,
 };
-// Original modalBox, modalIcon, modalText, modalButton still used for regular modals:
 const modalBox = {
   backgroundColor: '#fff', padding: '30px', borderRadius: '10px',
   textAlign: 'center', width: '300px', boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
